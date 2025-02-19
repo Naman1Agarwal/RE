@@ -1,0 +1,59 @@
+
+test1:     file format elf64-x86-64
+
+
+Disassembly of section .rodata:
+
+0000000000002b20 <_IO_stdin_used>:
+    2b20:	01 00 02 00 00 00 00 00 00 00 00 00 00 00 00 00     ................
+	...
+
+0000000000002b40 <sbox>:
+    2b40:	63 7c 77 7b f2 6b 6f c5 30 01 67 2b fe d7 ab 76     c|w{.ko.0.g+...v
+    2b50:	ca 82 c9 7d fa 59 47 f0 ad d4 a2 af 9c a4 72 c0     ...}.YG.......r.
+    2b60:	b7 fd 93 26 36 3f f7 cc 34 a5 e5 f1 71 d8 31 15     ...&6?..4...q.1.
+    2b70:	04 c7 23 c3 18 96 05 9a 07 12 80 e2 eb 27 b2 75     ..#..........'.u
+    2b80:	09 83 2c 1a 1b 6e 5a a0 52 3b d6 b3 29 e3 2f 84     ..,..nZ.R;..)./.
+    2b90:	53 d1 00 ed 20 fc b1 5b 6a cb be 39 4a 4c 58 cf     S... ..[j..9JLX.
+    2ba0:	d0 ef aa fb 43 4d 33 85 45 f9 02 7f 50 3c 9f a8     ....CM3.E...P<..
+    2bb0:	51 a3 40 8f 92 9d 38 f5 bc b6 da 21 10 ff f3 d2     Q.@...8....!....
+    2bc0:	cd 0c 13 ec 5f 97 44 17 c4 a7 7e 3d 64 5d 19 73     ...._.D...~=d].s
+    2bd0:	60 81 4f dc 22 2a 90 88 46 ee b8 14 de 5e 0b db     `.O."*..F....^..
+    2be0:	e0 32 3a 0a 49 06 24 5c c2 d3 ac 62 91 95 e4 79     .2:.I.$\...b...y
+    2bf0:	e7 c8 37 6d 8d d5 4e a9 6c 56 f4 ea 65 7a ae 08     ..7m..N.lV..ez..
+    2c00:	ba 78 25 2e 1c a6 b4 c6 e8 dd 74 1f 4b bd 8b 8a     .x%.......t.K...
+    2c10:	70 3e b5 66 48 03 f6 0e 61 35 57 b9 86 c1 1d 9e     p>.fH...a5W.....
+    2c20:	e1 f8 98 11 69 d9 8e 94 9b 1e 87 e9 ce 55 28 df     ....i........U(.
+    2c30:	8c a1 89 0d bf e6 42 68 41 99 2d 0f b0 54 bb 16     ......BhA.-..T..
+
+0000000000002c40 <rsbox>:
+    2c40:	52 09 6a d5 30 36 a5 38 bf 40 a3 9e 81 f3 d7 fb     R.j.06.8.@......
+    2c50:	7c e3 39 82 9b 2f ff 87 34 8e 43 44 c4 de e9 cb     |.9../..4.CD....
+    2c60:	54 7b 94 32 a6 c2 23 3d ee 4c 95 0b 42 fa c3 4e     T{.2..#=.L..B..N
+    2c70:	08 2e a1 66 28 d9 24 b2 76 5b a2 49 6d 8b d1 25     ...f(.$.v[.Im..%
+    2c80:	72 f8 f6 64 86 68 98 16 d4 a4 5c cc 5d 65 b6 92     r..d.h....\.]e..
+    2c90:	6c 70 48 50 fd ed b9 da 5e 15 46 57 a7 8d 9d 84     lpHP....^.FW....
+    2ca0:	90 d8 ab 00 8c bc d3 0a f7 e4 58 05 b8 b3 45 06     ..........X...E.
+    2cb0:	d0 2c 1e 8f ca 3f 0f 02 c1 af bd 03 01 13 8a 6b     .,...?.........k
+    2cc0:	3a 91 11 41 4f 67 dc ea 97 f2 cf ce f0 b4 e6 73     :..AOg.........s
+    2cd0:	96 ac 74 22 e7 ad 35 85 e2 f9 37 e8 1c 75 df 6e     ..t"..5...7..u.n
+    2ce0:	47 f1 1a 71 1d 29 c5 89 6f b7 62 0e aa 18 be 1b     G..q.)..o.b.....
+    2cf0:	fc 56 3e 4b c6 d2 79 20 9a db c0 fe 78 cd 5a f4     .V>K..y ....x.Z.
+    2d00:	1f dd a8 33 88 07 c7 31 b1 12 10 59 27 80 ec 5f     ...3...1...Y'.._
+    2d10:	60 51 7f a9 19 b5 4a 0d 2d e5 7a 9f 93 c9 9c ef     `Q....J.-.z.....
+    2d20:	a0 e0 3b 4d ae 2a f5 b0 c8 eb bb 3c 83 53 99 61     ..;M.*.....<.S.a
+    2d30:	17 2b 04 7e ba 77 d6 26 e1 69 14 63 55 21 0c 7d     .+.~.w.&.i.cU!.}
+
+0000000000002d40 <Rcon>:
+    2d40:	8d 01 02 04 08 10 20 40 80 1b 36 00 00 00 00 00     ...... @..6.....
+
+0000000000002d50 <K.1928>:
+    2d50:	99 79 82 5a a1 eb d9 6e dc bc 1b 8f d6 c1 62 ca     .y.Z...n......b.
+    2d60:	55 73 61 67 65 3a 20 65 78 65 20 28 2d 65 20 6f     Usage: exe (-e o
+    2d70:	72 20 2d 64 29 20 70 61 73 73 70 68 72 61 73 65     r -d) passphrase
+    2d80:	20 69 6e 70 75 74 66 69 6c 65 20 6f 75 74 70 75      inputfile outpu
+    2d90:	74 66 69 6c 65 00 68 65 64 3a 00 6b 69 6d 6a 6f     tfile.hed:.kimjo
+    2da0:	6e 67 75 6e 5f 73 75 70 72 65 6d 65 6c 65 61 64     ngun_supremelead
+    2db0:	65 72 00 73 75 63 63 65 73 73 00 77 72 6f 6e 67     er.success.wrong
+    2dc0:	20 70 61 73 73 77 6f 72 64 2e 20 67 6f 6f 64 2d      password. good-
+    2dd0:	62 79 65 00                                         bye.

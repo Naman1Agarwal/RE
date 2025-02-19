@@ -1,0 +1,8 @@
+
+ex_1:     file format elf64-x86-64
+
+
+Disassembly of section .rodata:
+
+0000000000000720 <_IO_stdin_used>:
+ 720:	01 00 02 00 25 64 0a 00                             ....%d..

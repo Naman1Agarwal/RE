@@ -1,0 +1,106 @@
+undefined8 main(int param_1,char **param_2)
+
+{
+  int iVar1;
+  int __fd;
+  size_t sVar2;
+  long in_FS_OFFSET;
+  int local_5d4;
+  int local_5d0;
+  undefined local_5b8 [112];
+  undefined local_548 [192];
+  char local_488 [16];
+  undefined local_478;
+  undefined local_477;
+  undefined local_476;
+  undefined local_475;
+  undefined local_474;
+  undefined local_473;
+  undefined local_472;
+  undefined local_471;
+  undefined local_470;
+  undefined local_46f;
+  undefined local_46e;
+  undefined local_46d;
+  undefined local_46c;
+  undefined local_46b;
+  undefined local_46a;
+  undefined local_469;
+  char local_468 [32];
+  char local_448 [64];
+  char local_408 [1000];
+  long local_20;
+  
+  local_20 = *(long *)(in_FS_OFFSET + 0x28);
+  local_478 = 0x15;
+  local_477 = 0x9f;
+  local_476 = 0x31;
+  local_475 = 0x16;
+  local_474 = 0xbf;
+  local_473 = 0xde;
+  local_472 = 0xb;
+  local_471 = 0x14;
+  local_470 = 0x70;
+  local_46f = 0x34;
+  local_46e = 0x8e;
+  local_46d = 0x6e;
+  local_46c = 0x32;
+  local_46b = 0xc3;
+  local_46a = 0xb9;
+  local_469 = 0xe0;
+LAB_001027cd:
+  do {
+    iVar1 = getopt(param_1,param_2,"hed:");
+    if (iVar1 == -1) {
+      iVar1 = open(param_2[3],0);
+      __fd = open(param_2[4],0x41,0x1c0);
+      read(iVar1,local_408,1000);
+      HASHReset(local_5b8);
+      sVar2 = strlen(param_2[2]);
+      HASHInput(local_5b8,param_2[2],sVar2 & 0xffffffff);
+      HASHResult(local_5b8,local_468);
+      strncpy(local_488,local_468,0x10);
+      iVar1 = strncmp("kimjongun_supremeleader",param_2[2],0x17);
+      if (iVar1 == 0) {
+        puts("success");
+        for (local_5d4 = 0; sVar2 = strlen(local_408), (ulong)(long)local_5d4 < sVar2;
+            local_5d4 = local_5d4 + 1) {
+          local_448[local_5d4] = local_408[local_5d4];
+        }
+        AES_init_ctx_iv(local_548,local_488,iv);
+        if (local_5d0 == 0) {
+          AES_CBC_encrypt_buffer(local_548,local_448,0x10);
+        }
+        else if (local_5d0 == 1) {
+          AES_CBC_decrypt_buffer(local_548,local_448,0x10);
+        }
+        for (local_5d4 = 0; sVar2 = strlen(local_448), (ulong)(long)local_5d4 < sVar2;
+            local_5d4 = local_5d4 + 1) {
+          local_408[local_5d4] = local_448[local_5d4];
+        }
+        sVar2 = strlen(local_408);
+        write(__fd,local_408,sVar2);
+      }
+      else {
+        puts("wrong password. good-bye");
+      }
+LAB_00102a73:
+      if (local_20 == *(long *)(in_FS_OFFSET + 0x28)) {
+        return 0;
+      }
+                    /* WARNING: Subroutine does not return */
+      __stack_chk_fail();
+    }
+    if (iVar1 == 0x65) {
+      local_5d0 = 0;
+      goto LAB_001027cd;
+    }
+    if (iVar1 == 0x68) {
+      puts("Usage: exe (-e or -d) passphrase inputfile outputfile");
+      goto LAB_00102a73;
+    }
+    if (iVar1 == 100) {
+      local_5d0 = 1;
+    }
+  } while( true );
+}

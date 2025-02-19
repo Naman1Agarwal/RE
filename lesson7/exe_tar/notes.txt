@@ -1,0 +1,49 @@
+Is the file executable?
+file shell1         
+shell1: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, interpreter /lib64/ld-linux-x86-64.so.2, for GNU/Linux 3.2.0, BuildID[sha1]=ccbb82c28d77758580520b3fcc9572dd1ab25d7e, not stripped
+
+
+When was the binary written to disk?
+stat pass1                
+  File: pass1
+  Size: 13288           Blocks: 32         IO Block: 4096   regular file
+Device: 8,1     Inode: 2626121     Links: 1
+Access: (0700/-rwx------)  Uid: ( 1000/    kali)   Gid: ( 1000/    kali)
+Access: 2025-02-03 13:47:41.550152267 -0500
+Modify: 2021-02-07 15:56:16.000000000 -0500
+Change: 2025-02-03 13:34:21.417550469 -0500
+ Birth: 2025-02-03 13:34:21.417550469 -0500
+
+
+What architecture is being used? Is it x86 or something else?
+x86-64
+
+
+Is the binary stripped of its symbol table?
+no
+
+
+Can we identify any useful strings or constants within the binary?
+yes
+
+
+Is there a running process associated with the binary?
+ps aux | grep pass1
+
+
+Can we compare a hash of the binary to another file?
+sha1sum pass1
+427d635166d7c959002bd97ce3d919a9ced2d451
+
+What was the original language used for the program?
+probably c
+
+Can we identify any useful function names?
+nm pass1 | less
+
+Can we identify any libraries used?
+Does the program take any input? Is the input validated?
+What else do we know about the binary?
+Is it crypto related?
+Is it malware related?
+Based on what we know are there RFCs or other documents that detail information about what could be in the binary/binaries?

@@ -2,3 +2,79 @@
 
 
 0x46 0x4a 0xd 0x19 0x43 0x13 0x4a 0x4a 0 0x54 2 0xe
+
+
+pcVar3 = getenv("PART4_TOKEN")
+
+
+undefined8
+main(undefined8 param_1,undefined8 param_2,undefined8 param_3,undefined8 param_4,undefined8 param_5,
+    undefined8 param_6)
+
+{
+  int iVar1;
+  uint uVar2;
+  char *part4Token;
+  long in_FS_OFFSET;
+  uint local_428 [2];
+  char *local_420;
+  char pid_password [1032];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  part4Token = getenv("PART4_TOKEN");
+  if (part4Token == (char *)0x0) {
+    puts("Missing credential!");
+                    /* WARNING: Subroutine does not return */
+    exit(1);
+  }
+  local_420 = getenv("USER");
+  update_hash(local_428);
+  snprintf(pid_password,0x400,"%x",(ulong)local_428[0],param_5,param_6,param_2);
+  iVar1 = strcmp(pid_password,part4Token);
+  if (iVar1 != 0) {
+    puts("Incorrect credential!");
+                    /* WARNING: Subroutine does not return */
+    exit(1);
+  }
+  uVar2 = getpid();
+  snprintf(pid_password,0x400,"%i:horse feathers",(ulong)uVar2);
+  part4Token = getpass("Enter password: ");
+  iVar1 = strcmp(pid_password,part4Token);
+  if (iVar1 == 0) {
+    puts("Welcome back!");
+  }
+  else {
+    puts("Intruder detected!");
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return 0;
+}
+
+
+void update_hash(uint *param_1)
+
+{
+  int iVar1;
+  size_t sVar2;
+  int local_1c;
+  
+  sVar2 = strlen(*(char **)(param_1 + 2));
+  iVar1 = (int)sVar2 / 4;
+  *param_1 = 0;
+  for (local_1c = 0; local_1c < iVar1; local_1c = local_1c + 1) {
+    *param_1 = *param_1 ^ *(uint *)((long)(local_1c * 4) * 4 + *(long *)(param_1 + 2));
+  }
+  for (local_1c = 0; local_1c < (int)sVar2 % 4; local_1c = local_1c + 1) {
+    *param_1 = *param_1 ^
+               (int)*(char *)((long)(local_1c + iVar1 * 4) + *(long *)(param_1 + 2)) <<
+               ((char)local_1c * '\x02' & 0x1fU);
+  }
+  return;
+}
+
+3313:horse feathers
+3345:horse feathers

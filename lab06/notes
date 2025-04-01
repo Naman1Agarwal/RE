@@ -1,0 +1,124 @@
+0x00000000000009e0  _init
+0x0000000000000a10  putchar@plt
+0x0000000000000a20  strcasecmp@plt
+0x0000000000000a30  srandom@plt
+0x0000000000000a40  puts@plt
+0x0000000000000a50  strlen@plt
+0x0000000000000a60  __stack_chk_fail@plt
+0x0000000000000a70  printf@plt
+0x0000000000000a80  fgets@plt
+0x0000000000000a90  time@plt
+0x0000000000000aa0  random@plt
+0x0000000000000ab0  fflush@plt
+0x0000000000000ac0  getopt@plt
+0x0000000000000ad0  exit@plt
+0x0000000000000ae0  fwrite@plt
+0x0000000000000af0  __cxa_finalize@plt
+0x0000000000000b00  _start
+0x0000000000000b30  deregister_tm_clones
+0x0000000000000b70  register_tm_clones
+0x0000000000000bc0  __do_global_dtors_aux
+0x0000000000000c00  frame_dummy
+0x0000000000000c0a  main
+0x0000000000000d7a  usermove
+0x0000000000001051  compmove
+0x000000000000112f  promove
+0x0000000000001386  drawcard
+0x00000000000014cf  gofish
+0x000000000000154c  goodmove
+0x00000000000016cf  chkwinner
+0x0000000000001818  printplayer
+0x0000000000001859  printhand
+0x000000000000198b  countcards
+0x00000000000019c2  countbooks
+0x0000000000001a58  init
+0x0000000000001bd9  nrandom
+0x0000000000001bf1  usage
+0x0000000000001c20  __libc_csu_init
+0x0000000000001c90  __libc_csu_fini
+0x0000000000001c94  _fini
+
+
+
+
+
+ulong usermove(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  char *pcVar5;
+  size_t sVar6;
+  long in_FS_OFFSET;
+  undefined8 local_130;
+  char local_128 [264];
+  long local_20;
+  
+  local_20 = *(long *)(in_FS_OFFSET + 0x28);
+  printf("\nYour hand is:");
+  printhand(userhand);
+  while( true ) {
+    while( true ) {
+      while( true ) {
+        do {
+          printf("You ask me for: ");
+          fflush(stdout);
+          pcVar5 = fgets(local_128,0x100,stdin);
+          if (pcVar5 == (char *)0x0) {
+                    /* WARNING: Subroutine does not return */
+            exit(0);
+          }
+        } while (local_128[0] == '\0');
+        if (local_128[0] != '\n') break;
+        uVar1 = countcards(deck);
+        uVar2 = countcards(comphand);
+        printf("%d cards in my hand, %d in the pool.\n",(ulong)uVar2,(ulong)uVar1);
+        printf("My books:");
+        countbooks(comphand);
+      }
+      sVar6 = strlen(local_128);
+      local_128[sVar6 - 1] = '\0';
+      iVar3 = strcasecmp(local_128,"p");
+      if ((iVar3 != 0) || (promode != 0)) break;
+      promode = 1;
+      puts("Entering pro mode.");
+    }
+    iVar3 = strcasecmp(local_128,"quit");
+    if (iVar3 == 0) break;
+    local_130 = &cards;
+    while ((*local_130 != (undefined *)0x0 && (iVar3 = strcasecmp(*local_130,local_128), iVar3 != 0)
+           )) {
+      local_130 = local_130 + 1;
+    }
+    if (*local_130 == (undefined *)0x0) {
+      puts("I don\'t understand!");
+    }
+    else {
+      iVar3 = (int)((long)(local_130 + -0x60604) >> 3);
+      if (*(int *)(userhand + (long)iVar3 * 4) != 0) {
+        *(undefined4 *)(userasked + (long)iVar3 * 4) = 1;
+        if (local_20 == *(long *)(in_FS_OFFSET + 0x28)) {
+          return (long)(local_130 + -0x60604) >> 3 & 0xffffffff;
+        }
+                    /* WARNING: Subroutine does not return */
+        __stack_chk_fail();
+      }
+      iVar4 = nrandom(3);
+      if (iVar4 == 1) {
+        puts("You don\'t have any of those!");
+      }
+      else {
+        printf("You don\'t have any %s\'s!\n",(&cards)[iVar3]);
+      }
+      iVar3 = nrandom(4);
+      if (iVar3 == 1) {
+        puts("No cheating!");
+      }
+      puts("Guess again.");
+    }
+  }
+                    /* WARNING: Subroutine does not return */
+  exit(0);
+}

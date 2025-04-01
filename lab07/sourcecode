@@ -1,0 +1,829 @@
+
+undefined8 main(void)
+
+{
+  long in_FS_OFFSET;
+  int local_18;
+  int local_14;
+  long canary;
+  
+  canary = *(long *)(in_FS_OFFSET + 0x28);
+  local_18 = 100000;
+  setlocale(6,"en_US.utf8");
+  bank_init();
+  init_deck();
+  puts("Welcome to Blackjack!");
+  puts("Loading bank...");
+  local_18 = load_bank();
+  if (local_18 < 0) {
+    puts("Error loading bank!  Sorry for the problem; have $100,000 on me.");
+    local_18 = 100000;
+  }
+  while ((499 < local_18 && (local_14 = get_bet(local_18), local_14 != 0))) {
+    play_hand(local_14,&local_18);
+  }
+  puts("Saving bank...");
+  save_bank(local_18);
+  if (local_18 < 500) {
+    puts("Sorry, you\'re bankrupt.  Better luck next time!");
+  }
+  else {
+    puts("See you next time!");
+  }
+  if (canary == *(long *)(in_FS_OFFSET + 0x28)) {
+    return 0;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+
+void bank_init(void)
+
+{
+  crypto_init();
+  return;
+}
+
+void crypto_init(void)
+
+{
+  OPENSSL_init_crypto(0xc,0);
+  return;
+}
+
+void OPENSSL_init_crypto(void)
+
+{
+                    /* WARNING: Bad instruction - Truncating control flow here */
+                    /* OPENSSL_init_crypto@OPENSSL_3.0.0 */
+  halt_baddata();
+}
+
+
+void init_deck(void)
+
+{
+  init_suit(deck,0);
+  init_suit(0x1070e8,1);
+  init_suit(0x107150,2);
+  init_suit(0x1071b8,3);
+  return;
+}
+
+void init_suit(long param_1,undefined4 param_2)
+
+{
+  time_t tVar1;
+  undefined4 local_c;
+  
+  tVar1 = time((time_t *)0x0);
+  srandom((uint)tVar1);
+  for (local_c = 0; local_c < 0xd; local_c = local_c + 1) {
+    *(undefined4 *)((long)local_c * 8 + param_1) = param_2;
+    *(int *)(param_1 + (long)local_c * 8 + 4) = local_c + 1;
+  }
+  return;
+}
+
+
+uint load_bank(void)
+
+{
+  int iVar1;
+  undefined8 uVar2;
+  long in_FS_OFFSET;
+  uint local_350;
+  int local_34c;
+  undefined8 local_348;
+  undefined8 local_340;
+  undefined8 local_338;
+  char *local_330;
+  FILE *local_328;
+  long local_320;
+  char local_318 [256];
+  char local_218 [256];
+  undefined local_118 [264];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_348 = 0;
+  local_338 = 0;
+  local_330 = getenv("USER");
+  if (local_330 == (char *)0x0) {
+    fwrite("Failed to get user id loading bank.\n",1,0x24,stderr);
+    local_350 = 0xffffffff;
+  }
+  else {
+    snprintf(local_318,0x100,"%s.bank",local_330);
+    local_328 = fopen(local_318,"r");
+    if (local_328 == (FILE *)0x0) {
+      perror("Error opening bank file for reading");
+      local_350 = 0xffffffff;
+    }
+    else {
+      local_34c = __isoc99_fscanf(local_328,"Bank: %d\n",&local_350);
+      if (local_34c == 1) {
+        local_34c = __isoc99_fscanf(local_328,"HMAC: %255s\n",local_118);
+        if (local_34c == 1) {
+          Base64Decode(local_118,&local_348,&local_340);
+          iVar1 = snprintf(local_218,0x100,"%s|%d",local_330,(ulong)local_350);
+          local_320 = (long)iVar1;
+          uVar2 = get_mac_key();
+          iVar1 = verify_it(local_218,local_320,local_348,local_340,uVar2);
+          if (iVar1 != 0) {
+            fwrite("Error verifying bank file signature!\n",1,0x25,stderr);
+            local_350 = 0xffffffff;
+          }
+        }
+        else {
+          fwrite("Format error reading from bank file!\n",1,0x25,stderr);
+          fclose(local_328);
+          local_350 = 0xffffffff;
+        }
+      }
+      else {
+        fwrite("Format error reading from bank file!\n",1,0x25,stderr);
+        fclose(local_328);
+        local_350 = 0xffffffff;
+      }
+    }
+  }
+  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) {
+    return local_350;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+
+
+undefined8 Base64Decode(char *param_1,long *param_2,long *param_3)
+
+{
+  int iVar1;
+  int iVar2;
+  void *pvVar3;
+  BIO *pBVar4;
+  BIO_METHOD *type;
+  BIO *b;
+  size_t sVar5;
+  
+  iVar1 = calcDecodeLength(param_1);
+  pvVar3 = malloc((long)(iVar1 + 1));
+  *param_2 = (long)pvVar3;
+  *(undefined *)((long)iVar1 + *param_2) = 0;
+  pBVar4 = BIO_new_mem_buf(param_1,-1);
+  type = BIO_f_base64();
+  b = BIO_new(type);
+  pBVar4 = BIO_push(b,pBVar4);
+  BIO_set_flags(pBVar4,0x100);
+  sVar5 = strlen(param_1);
+  iVar2 = BIO_read(pBVar4,(void *)*param_2,(int)sVar5);
+  *param_3 = (long)iVar2;
+  if (*param_3 != (long)iVar1) {
+                    /* WARNING: Subroutine does not return */
+    __assert_fail("*length == decodeLen","crypto.c",0xfe,"Base64Decode");
+  }
+  BIO_free_all(pBVar4);
+  return 0;
+}
+
+
+void get_mac_key(void)
+
+{
+  EVP_PKEY_new_mac_key(0x357,(ENGINE *)0x0,secret_key,secret_key_len);
+  return;
+}
+
+bool verify_it(long param_1,long param_2,void *param_3,ulong param_4,EVP_PKEY *param_5)
+
+{
+  int iVar1;
+  ulong uVar2;
+  long in_FS_OFFSET;
+  uint local_80;
+  size_t local_78;
+  EVP_MD_CTX *local_70;
+  EVP_MD *local_68;
+  size_t local_60;
+  uchar local_58 [72];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_80 = 0xffffffff;
+  if ((((param_1 == 0) || (param_2 == 0)) || (param_3 == (void *)0x0)) ||
+     ((param_4 == 0 || (param_5 == (EVP_PKEY *)0x0)))) {
+                    /* WARNING: Subroutine does not return */
+    __assert_fail("0","crypto.c",0x85,"verify_it");
+  }
+  local_70 = (EVP_MD_CTX *)0x0;
+  local_70 = (EVP_MD_CTX *)EVP_MD_CTX_new();
+  if (local_70 == (EVP_MD_CTX *)0x0) {
+                    /* WARNING: Subroutine does not return */
+    __assert_fail("ctx != NULL","crypto.c",0x8e,"verify_it");
+  }
+  if (local_70 == (EVP_MD_CTX *)0x0) {
+    uVar2 = ERR_get_error();
+    printf("EVP_MD_CTX_create failed, error 0x%lx\n",uVar2 & 0xffffffff);
+  }
+  else {
+    local_68 = EVP_get_digestbyname("SHA256");
+    if (local_68 == (EVP_MD *)0x0) {
+                    /* WARNING: Subroutine does not return */
+      __assert_fail("md != NULL","crypto.c",0x95,"verify_it");
+    }
+    if (local_68 == (EVP_MD *)0x0) {
+      uVar2 = ERR_get_error();
+      printf("EVP_get_digestbyname failed, error 0x%lx\n",uVar2 & 0xffffffff);
+    }
+    else {
+      iVar1 = EVP_DigestInit_ex(local_70,local_68,(ENGINE *)0x0);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0x9c,"verify_it");
+      }
+      iVar1 = EVP_DigestSignInit(local_70,(EVP_PKEY_CTX **)0x0,local_68,(ENGINE *)0x0,param_5);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0xa3,"verify_it");
+      }
+      iVar1 = EVP_DigestSignUpdate(local_70,param_1,param_2);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0xaa,"verify_it");
+      }
+      local_78 = 0x40;
+      iVar1 = EVP_DigestSignFinal(local_70,local_58,&local_78);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0xb4,"verify_it");
+      }
+      if (local_78 == 0) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("size > 0","crypto.c",0xba,"verify_it");
+      }
+      if (local_78 == 0) {
+        puts("EVP_DigestSignFinal failed (2)");
+      }
+      else {
+        local_60 = local_78;
+        if (param_4 <= local_78) {
+          local_60 = param_4;
+        }
+        iVar1 = CRYPTO_memcmp(param_3,local_58,local_60);
+        local_80 = (uint)(iVar1 != 0);
+        OPENSSL_cleanse(local_58,0x40);
+      }
+    }
+  }
+  if (local_70 != (EVP_MD_CTX *)0x0) {
+    EVP_MD_CTX_free(local_70);
+    local_70 = (EVP_MD_CTX *)0x0;
+  }
+  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) {
+    return local_80 != 0;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+
+void play_hand(int param_1,int *param_2)
+
+{
+  int iVar1;
+  uint uVar2;
+  undefined8 uVar3;
+  long lVar4;
+  long in_FS_OFFSET;
+  int local_27c;
+  int local_274;
+  int local_270;
+  int local_26c;
+  int local_268;
+  uint local_264;
+  undefined4 local_260;
+  int local_25c;
+  int local_258;
+  int local_254;
+  int local_250;
+  uint local_24c;
+  undefined8 local_248;
+  int iStack_23c;
+  undefined8 local_1e8 [12];
+  undefined8 local_188 [12];
+  undefined local_128 [264];
+  long local_20;
+  
+  local_20 = *(long *)(in_FS_OFFSET + 0x28);
+  local_270 = 0;
+  local_26c = 0;
+  local_274 = 0;
+  local_264 = (uint)(param_1 * 2 <= *param_2);
+  local_260 = 0;
+  local_25c = 0;
+  local_258 = 0;
+  local_254 = 0;
+  local_250 = 0;
+  shuffle();
+  for (local_268 = 0; local_268 < 2; local_268 = local_268 + 1) {
+    lVar4 = (long)local_270;
+    local_270 = local_270 + 1;
+    uVar3 = deal();
+    (&local_248)[lVar4] = uVar3;
+  }
+  if ((local_264 == 0) || (local_248._4_4_ != iStack_23c)) {
+    local_260 = 0;
+  }
+  else {
+    local_260 = 1;
+  }
+  for (local_268 = 0; local_268 < 2; local_268 = local_268 + 1) {
+    lVar4 = (long)local_274;
+    local_274 = local_274 + 1;
+    uVar3 = deal();
+    local_188[lVar4] = uVar3;
+  }
+  card2str(local_188,local_128,0x100);
+  printf("Dealer shows %s ??\n\n",local_128);
+  local_27c = param_1;
+LAB_00103499:
+  iVar1 = score_hand(&local_248,local_270);
+  if ((0x14 < iVar1) || (local_258 != 0)) {
+    hand2str(&local_248,local_270,local_128,0x100);
+    uVar2 = score_hand(&local_248,local_270);
+    printf("Players final hand is %s, with a score of %d.\n",local_128,(ulong)uVar2);
+    iVar1 = score_hand(&local_248,local_270);
+    if (0x15 < iVar1) {
+      puts("Player busts!");
+      local_254 = 1;
+      *param_2 = *param_2 - local_27c;
+    }
+    if (local_25c != 0) {
+      printf("Split hand.  Working on second hand.");
+      local_260 = 0;
+      local_264 = 0;
+      local_258 = 0;
+      while ((iVar1 = score_hand(local_1e8,local_26c), iVar1 < 0x15 && (local_258 == 0))) {
+        hand2str(local_1e8,local_26c,local_128,0x100);
+        printf("Your hand is %s.\n",local_128);
+        local_24c = get_action(0,0);
+        if (local_24c == 0) {
+          lVar4 = (long)local_26c;
+          local_26c = local_26c + 1;
+          uVar3 = deal();
+          local_1e8[lVar4] = uVar3;
+        }
+        else if (local_24c == 1) {
+          local_258 = 1;
+        }
+      }
+      hand2str(local_1e8,local_26c,local_128,0x100);
+      uVar2 = score_hand(local_1e8,local_26c);
+      printf("Players final hand is %s, with a score of %d.\n",local_128,(ulong)uVar2);
+    }
+    iVar1 = score_hand(local_1e8,local_26c);
+    if (0x15 < iVar1) {
+      puts("Player busts!");
+      local_250 = 1;
+      *param_2 = *param_2 - local_27c;
+    }
+    if ((local_254 == 0) || ((local_25c != 0 && (local_250 == 0)))) {
+      play_dealer_hand(local_188,&local_274);
+      if ((local_25c != 0) && (local_254 == 0)) {
+        puts("Split hand.  Scoring first hand:");
+      }
+      if (local_254 == 0) {
+        hand_results(&local_248,local_270,local_188,local_274,local_27c,param_2);
+      }
+      if ((local_25c != 0) && (local_250 == 0)) {
+        puts("Split hand. Scoring second hand:");
+        hand_results(local_1e8,local_26c,local_188,local_274,local_27c,param_2);
+      }
+    }
+    if (local_20 == *(long *)(in_FS_OFFSET + 0x28)) {
+      return;
+    }
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  hand2str(&local_248,local_270,local_128,0x100);
+  printf("Your hand is %s.\n",local_128);
+  local_24c = get_action(local_264,local_260);
+  local_264 = 0;
+  local_260 = 0;
+  if (local_24c != 3) goto code_r0x001033c3;
+  local_27c = local_27c << 1;
+  lVar4 = (long)local_270;
+  local_270 = local_270 + 1;
+  uVar3 = deal();
+  (&local_248)[lVar4] = uVar3;
+  goto LAB_0010348e;
+code_r0x001033c3:
+  if (local_24c < 4) {
+    if (local_24c == 2) {
+      puts("Split hand.  Working on first hand.");
+      local_25c = 1;
+      local_270 = 1;
+      local_26c = 1;
+    }
+    else if (local_24c < 3) {
+      if (local_24c == 0) {
+        lVar4 = (long)local_270;
+        local_270 = local_270 + 1;
+        uVar3 = deal();
+        (&local_248)[lVar4] = uVar3;
+      }
+      else if (local_24c == 1) {
+LAB_0010348e:
+        local_258 = 1;
+      }
+    }
+  }
+  goto LAB_00103499;
+}
+
+
+undefined8 deal(void)
+
+{
+  int iVar1;
+  
+  iVar1 = dealt;
+  dealt = dealt + 1;
+  return *(undefined8 *)(deck + (long)iVar1 * 8);
+}
+
+
+undefined8 save_bank(uint param_1)
+
+{
+  int iVar1;
+  undefined8 uVar2;
+  long in_FS_OFFSET;
+  undefined8 local_248;
+  undefined8 local_240;
+  undefined8 local_238;
+  char *local_230;
+  FILE *local_228;
+  long local_220;
+  char local_218 [256];
+  char local_118 [264];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_248 = 0;
+  local_240 = 0;
+  local_230 = getenv("USER");
+  if (local_230 == (char *)0x0) {
+    fwrite("Failed to get user id saving bank.\n",1,0x23,stderr);
+    uVar2 = 0xffffffff;
+  }
+  else {
+    snprintf(local_218,0x100,"%s.bank",local_230);
+    local_228 = fopen(local_218,"w");
+    if (local_228 == (FILE *)0x0) {
+      perror("Error opening bank file for writing");
+      uVar2 = 0xffffffff;
+    }
+    else {
+      iVar1 = snprintf(local_118,0x100,"%s|%d",local_230,(ulong)param_1);
+      local_220 = (long)iVar1;
+      uVar2 = get_mac_key();
+      hmac_it(local_118,local_220,&local_248,&local_238,uVar2);
+      Base64Encode(local_248,local_238,&local_240);
+      fprintf(local_228,"Bank: %d\n",(ulong)param_1);
+      fprintf(local_228,"HMAC: %s\n",local_240);
+      fclose(local_228);
+      uVar2 = 0;
+    }
+  }
+  if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return uVar2;
+}
+
+
+bool hmac_it(long param_1,long param_2,long *param_3,size_t *param_4,EVP_PKEY *param_5)
+
+{
+  int iVar1;
+  ulong uVar2;
+  void *pvVar3;
+  long in_FS_OFFSET;
+  int local_30;
+  size_t local_28;
+  EVP_MD_CTX *local_20;
+  EVP_MD *local_18;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  local_30 = -1;
+  if ((((param_1 == 0) || (param_2 == 0)) || (param_3 == (long *)0x0)) ||
+     (param_5 == (EVP_PKEY *)0x0)) {
+                    /* WARNING: Subroutine does not return */
+    __assert_fail("0","crypto.c",0x1e,"hmac_it");
+  }
+  if (*param_3 != 0) {
+    CRYPTO_free((void *)*param_3);
+  }
+  *param_3 = 0;
+  *param_4 = 0;
+  local_20 = (EVP_MD_CTX *)0x0;
+  local_20 = (EVP_MD_CTX *)EVP_MD_CTX_new();
+  if (local_20 == (EVP_MD_CTX *)0x0) {
+                    /* WARNING: Subroutine does not return */
+    __assert_fail("ctx != NULL","crypto.c",0x2d,"hmac_it");
+  }
+  if (local_20 == (EVP_MD_CTX *)0x0) {
+    uVar2 = ERR_get_error();
+    printf("EVP_MD_CTX_create failed, error 0x%lx\n",uVar2 & 0xffffffff);
+  }
+  else {
+    local_18 = EVP_get_digestbyname("SHA256");
+    if (local_18 == (EVP_MD *)0x0) {
+                    /* WARNING: Subroutine does not return */
+      __assert_fail("md != NULL","crypto.c",0x34,"hmac_it");
+    }
+    if (local_18 == (EVP_MD *)0x0) {
+      uVar2 = ERR_get_error();
+      printf("EVP_get_digestbyname failed, error 0x%lx\n",uVar2 & 0xffffffff);
+    }
+    else {
+      iVar1 = EVP_DigestInit_ex(local_20,local_18,(ENGINE *)0x0);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0x3b,"hmac_it");
+      }
+      iVar1 = EVP_DigestSignInit(local_20,(EVP_PKEY_CTX **)0x0,local_18,(ENGINE *)0x0,param_5);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0x42,"hmac_it");
+      }
+      iVar1 = EVP_DigestSignUpdate(local_20,param_1,param_2);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0x49,"hmac_it");
+      }
+      local_28 = 0;
+      iVar1 = EVP_DigestSignFinal(local_20,(uchar *)0x0,&local_28);
+      if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("rc == 1","crypto.c",0x51,"hmac_it");
+      }
+      if (local_28 == 0) {
+                    /* WARNING: Subroutine does not return */
+        __assert_fail("req > 0","crypto.c",0x57,"hmac_it");
+      }
+      if (local_28 == 0) {
+        uVar2 = ERR_get_error();
+        printf("EVP_DigestSignFinal failed (2), error 0x%lx\n",uVar2 & 0xffffffff);
+      }
+      else {
+        pvVar3 = CRYPTO_malloc((int)local_28,"crypto.c",0x5d);
+        *param_3 = (long)pvVar3;
+        if (*param_3 == 0) {
+                    /* WARNING: Subroutine does not return */
+          __assert_fail("*val != NULL","crypto.c",0x5e,"hmac_it");
+        }
+        if (*param_3 == 0) {
+          uVar2 = ERR_get_error();
+          printf("OPENSSL_malloc failed, error 0x%lx\n",uVar2 & 0xffffffff);
+        }
+        else {
+          *param_4 = local_28;
+          iVar1 = EVP_DigestSignFinal(local_20,(uchar *)*param_3,param_4);
+          if (iVar1 != 1) {
+                    /* WARNING: Subroutine does not return */
+            __assert_fail("rc == 1","crypto.c",0x66,"hmac_it");
+          }
+          if (*param_4 != local_28) {
+                    /* WARNING: Subroutine does not return */
+            __assert_fail("req == *vlen","crypto.c",0x6c,"hmac_it");
+          }
+          if (*param_4 == local_28) {
+            local_30 = 0;
+          }
+          else {
+            printf("EVP_DigestSignFinal failed, mismatched signature sizes %ld, %ld",local_28,
+                   *param_4);
+          }
+        }
+      }
+    }
+  }
+  if (local_20 != (EVP_MD_CTX *)0x0) {
+    EVP_MD_CTX_free(local_20);
+    local_20 = (EVP_MD_CTX *)0x0;
+  }
+  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) {
+    return local_30 != 0;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+
+undefined8 get_action(int param_1,int param_2)
+
+{
+  undefined8 uVar1;
+  long in_FS_OFFSET;
+  char local_12 [2];
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  do {
+    if ((param_1 == 0) || (param_2 == 0)) {
+      if (param_2 == 0) {
+        if (param_1 == 0) {
+          printf("[H]it or [S]tand? ");
+        }
+        else {
+          printf("[H]it, [S]tand or [D]ouble down? ");
+        }
+      }
+      else {
+        printf("[H]it, [S]tand or s[P]lit? ");
+      }
+    }
+    else {
+      printf("[H]it, [S]tand, s[P]lit or [D]ouble down? ");
+    }
+    gets(local_12);
+    switch(local_12[0]) {
+    case 'D':
+    case 'd':
+      if (param_1 != 0) {
+        uVar1 = 3;
+        goto LAB_00102e87;
+      }
+      puts("Invalid input");
+      break;
+    default:
+      puts("Invalid input");
+      break;
+    case 'H':
+    case 'h':
+      uVar1 = 0;
+      goto LAB_00102e87;
+    case 'P':
+    case 'p':
+      if (param_2 != 0) {
+        uVar1 = 2;
+LAB_00102e87:
+        if (local_10 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+          __stack_chk_fail();
+        }
+        return uVar1;
+      }
+      puts("Invalid input");
+      break;
+    case 'S':
+    case 's':
+      uVar1 = 1;
+      goto LAB_00102e87;
+    }
+  } while( true );
+}
+
+
+int get_bet(uint param_1)
+
+{
+  int iVar1;
+  long in_FS_OFFSET;
+  int local_14;
+  long local_10;
+  
+  local_10 = *(long *)(in_FS_OFFSET + 0x28);
+  while( true ) {
+    while( true ) {
+      printf("You have $%\'d. How much would you like to bet? (Min $500, max $10,000, $0 to quit) $"
+             ,(ulong)param_1);
+      iVar1 = __isoc99_scanf(&DAT_00105295,&local_14);
+      if (iVar1 == 1) break;
+      puts("Please enter a number.");
+      __isoc99_scanf(&DAT_00105312);
+    }
+    __isoc99_scanf(&DAT_00105299);
+    if (local_14 == 0) break;
+    if (local_14 < 500) {
+      puts("Sorry, the minimum bet is 500.");
+    }
+    else if (local_14 < 0x2711) {
+      if (local_14 <= (int)param_1) break;
+      printf("Sorry, you only have %d.\n",(ulong)param_1);
+    }
+    else {
+      puts("Sorry, the maximum bet is 10000.");
+    }
+  }
+  if (local_10 == *(long *)(in_FS_OFFSET + 0x28)) {
+    return local_14;
+  }
+                    /* WARNING: Subroutine does not return */
+  __stack_chk_fail();
+}
+
+
+
+void hand_results(undefined8 param_1,undefined4 param_2,undefined8 param_3,undefined4 param_4,
+                 int param_5,int *param_6)
+
+{
+  int iVar1;
+  uint uVar2;
+  uint uVar3;
+  
+  iVar1 = is_blackjack(param_3,param_4);
+  if (iVar1 == 0) {
+    iVar1 = is_blackjack(param_1,param_2);
+    if (iVar1 == 0) {
+      uVar2 = score_hand(param_1,param_2);
+      uVar3 = score_hand(param_3,param_4);
+      if ((int)uVar3 < 0x16) {
+        printf("Player shows %d, dealer shows %d.\n",(ulong)uVar2,(ulong)uVar3);
+        if ((int)uVar2 < (int)uVar3) {
+          puts("Player loses.");
+          *param_6 = *param_6 - param_5;
+        }
+        else if ((int)uVar3 < (int)uVar2) {
+          puts("Player wins!");
+          *param_6 = *param_6 + param_5;
+        }
+        else {
+          puts("Hand is a push.");
+        }
+      }
+      else {
+        *param_6 = *param_6 + param_5;
+      }
+    }
+    else {
+      puts("Player has a blackjack! You win 3:2!");
+      *param_6 = *param_6 + (param_5 * 3) / 2;
+    }
+  }
+  else {
+    iVar1 = is_blackjack(param_1,param_2);
+    if (iVar1 == 0) {
+      puts("Dealer has a blackjack! Sorry, you lose.");
+      *param_6 = *param_6 - param_5;
+    }
+    else {
+      printf("Player and Dealer both have a blackjack! Hand is a push.");
+    }
+  }
+  return;
+}
+
+
+
+void play_dealer_hand(long param_1,int *param_2)
+
+{
+  int iVar1;
+  uint uVar2;
+  undefined8 uVar3;
+  long in_FS_OFFSET;
+  undefined local_128 [264];
+  long local_20;
+  
+  local_20 = *(long *)(in_FS_OFFSET + 0x28);
+  if (*param_2 == 2) {
+    hand2str(param_1,*param_2,local_128,0x100);
+    printf("Dealer\'s hand is %s\n",local_128);
+    while( true ) {
+      iVar1 = score_hand(param_1,*param_2);
+      if (0x10 < iVar1) break;
+      iVar1 = *param_2;
+      *param_2 = iVar1 + 1;
+      uVar3 = deal();
+      *(undefined8 *)((long)iVar1 * 8 + param_1) = uVar3;
+      hand2str(param_1,*param_2,local_128,0x100);
+      printf("Dealer hits! New dealer hand is: %s\n",local_128);
+    }
+    iVar1 = score_hand(param_1,*param_2);
+    if (iVar1 < 0x16) {
+      uVar2 = score_hand(param_1,*param_2);
+      printf("Dealer stands with a score of %d\n",(ulong)uVar2);
+    }
+    else {
+      puts("Dealer busts.");
+    }
+  }
+  else {
+    puts("Error! play_dealer_hand called without exactly 2 cards in the dealer\'s hand!");
+  }
+  if (local_20 != *(long *)(in_FS_OFFSET + 0x28)) {
+                    /* WARNING: Subroutine does not return */
+    __stack_chk_fail();
+  }
+  return;
+}

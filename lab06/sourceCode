@@ -1,0 +1,345 @@
+
+void main(int argc,char **argv)
+
+{
+  int iVar1;
+  ulong uVar2;
+  EVP_PKEY_CTX *ctx;
+  long in_FS_OFFSET;
+  time_t local_18;
+  undefined8 canary;
+  
+  canary = *(undefined8 *)(in_FS_OFFSET + 0x28);
+  while (iVar1 = getopt(argc,argv,"p"), iVar1 != -1) {
+    if (iVar1 == 0x70) {
+      promode = 1;
+    }
+    else {
+      usage();
+    }
+  }
+  uVar2 = time(&local_18);
+  ctx = (EVP_PKEY_CTX *)(uVar2 & 0xffffffff);
+  srandom((uint)uVar2);
+  init(ctx);
+  iVar1 = nrandom(2);
+  if (iVar1 == 1) {
+    printplayer(0);
+    puts("get to start.");
+    do {
+      while (iVar1 = compmove(), *(int *)(userhand + (long)iVar1 * 4) != 0) {
+        goodmove(0,iVar1,comphand,userhand);
+      }
+      for (iVar1 = gofish(iVar1,0,comphand); iVar1 != 0; iVar1 = gofish(iVar1,1,userhand)) {
+LAB_00100cb9:
+        while (iVar1 = usermove(), *(int *)(comphand + (long)iVar1 * 4) != 0) {
+          goodmove(1,iVar1,userhand,comphand);
+        }
+      }
+    } while( true );
+  }
+  printplayer(1);
+  puts("get to start.");
+  goto LAB_00100cb9;
+}
+
+
+
+
+ulong usermove(void)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  int iVar4;
+  char *pcVar5;
+  size_t sVar6;
+  long in_FS_OFFSET;
+  undefined8 local_130;
+  char input [264];
+  long local_20;
+  
+  local_20 = *(long *)(in_FS_OFFSET + 0x28);
+  printf("\nYour hand is:");
+  printhand(userhand);
+  while( true ) {
+    while( true ) {
+      while( true ) {
+        do {
+          printf("You ask me for: ");
+          fflush(stdout);
+          pcVar5 = fgets(input,0x100,stdin);
+          if (pcVar5 == (char *)0x0) {
+                    /* WARNING: Subroutine does not return */
+            exit(0);
+          }
+        } while (input[0] == '\0');
+        if (input[0] != '\n') break;
+        uVar1 = countcards(deck);
+        uVar2 = countcards(comphand);
+        printf("%d cards in my hand, %d in the pool.\n",(ulong)uVar2,(ulong)uVar1);
+        printf("My books:");
+        countbooks(comphand);
+      }
+      sVar6 = strlen(input);
+      input[sVar6 - 1] = '\0';
+      iVar3 = strcasecmp(input,"p");
+      if ((iVar3 != 0) || (promode != 0)) break;
+      promode = 1;
+      puts("Entering pro mode.");
+    }
+    iVar3 = strcasecmp(input,"quit");
+    if (iVar3 == 0) break;
+    local_130 = &cards;
+    while ((*local_130 != (undefined *)0x0 && (iVar3 = strcasecmp(*local_130,input), iVar3 != 0))) {
+      local_130 = local_130 + 1;
+    }
+    if (*local_130 == (undefined *)0x0) {
+      puts("I don\'t understand!");
+    }
+    else {
+      iVar3 = (int)((long)(local_130 + -0x60604) >> 3);
+      if (*(int *)(userhand + (long)iVar3 * 4) != 0) {
+        *(undefined4 *)(userasked + (long)iVar3 * 4) = 1;
+        if (local_20 == *(long *)(in_FS_OFFSET + 0x28)) {
+          return (long)(local_130 + -0x60604) >> 3 & 0xffffffff;
+        }
+                    /* WARNING: Subroutine does not return */
+        __stack_chk_fail();
+      }
+      iVar4 = nrandom(3);
+      if (iVar4 == 1) {
+        puts("You don\'t have any of those!");
+      }
+      else {
+        printf("You don\'t have any %s\'s!\n",(&cards)[iVar3]);
+      }
+      iVar3 = nrandom(4);
+      if (iVar3 == 1) {
+        puts("No cheating!");
+      }
+      puts("Guess again.");
+    }
+  }
+                    /* WARNING: Subroutine does not return */
+  exit(0);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+int compmove(void)
+
+{
+  if (promode == 0) {
+    do {
+      do {
+        lmove.3778 = (lmove.3778 + 1) % 0xd;
+      } while (*(int *)(comphand + (long)lmove.3778 * 4) == 0);
+    } while (*(int *)(comphand + (long)lmove.3778 * 4) == 4);
+  }
+  else {
+    lmove.3778 = promove();
+  }
+  *(undefined4 *)(asked + (long)lmove.3778 * 4) = 1;
+  printf("I ask you for: %s.\n",(&cards)[lmove.3778]);
+  return lmove.3778;
+}
+
+
+
+int promove(void)
+
+{
+  int iVar1;
+  int local_10;
+  int local_c;
+  
+  for (local_10 = 0; local_10 < 0xd; local_10 = local_10 + 1) {
+    if (((*(int *)(userasked + (long)local_10 * 4) != 0) &&
+        (0 < *(int *)(comphand + (long)local_10 * 4))) &&
+       (*(int *)(comphand + (long)local_10 * 4) < 4)) {
+      *(undefined4 *)(userasked + (long)local_10 * 4) = 0;
+      return local_10;
+    }
+  }
+  iVar1 = nrandom(3);
+  if (iVar1 == 1) {
+    local_10 = 0;
+    while ((*(int *)(comphand + (long)local_10 * 4) == 0 ||
+           (*(int *)(comphand + (long)local_10 * 4) == 4))) {
+      local_10 = local_10 + 1;
+    }
+    local_c = local_10;
+    while (local_10 = local_10 + 1, local_10 < 0xd) {
+      if ((*(int *)(comphand + (long)local_10 * 4) != 4) &&
+         (*(int *)(comphand + (long)local_c * 4) < *(int *)(comphand + (long)local_10 * 4))) {
+        local_c = local_10;
+      }
+    }
+    return local_c;
+  }
+  iVar1 = nrandom(0x400);
+  if (iVar1 == 0x1d3) {
+    for (local_10 = 0; local_10 < 0xd; local_10 = local_10 + 1) {
+      if ((*(int *)(userhand + (long)local_10 * 4) != 0) &&
+         (*(int *)(comphand + (long)local_10 * 4) != 0)) {
+        return local_10;
+      }
+    }
+  }
+  do {
+    for (local_10 = 0; local_10 < 0xd; local_10 = local_10 + 1) {
+      if (((*(int *)(comphand + (long)local_10 * 4) != 0) &&
+          (*(int *)(comphand + (long)local_10 * 4) != 4)) &&
+         (*(int *)(asked + (long)local_10 * 4) == 0)) {
+        return local_10;
+      }
+    }
+    for (local_10 = 0; local_10 < 0xd; local_10 = local_10 + 1) {
+      *(undefined4 *)(asked + (long)local_10 * 4) = 0;
+    }
+  } while( true );
+}
+
+
+
+
+
+
+
+
+
+
+
+
+void goodmove(int param_1,int param_2,long param_3,long param_4)
+
+{
+  undefined *puVar1;
+  
+  printplayer(1 - param_1);
+  if (*(int *)(param_4 + (long)param_2 * 4) == 1) {
+    puVar1 = &DAT_00101e0f;
+  }
+  else {
+    puVar1 = &DAT_00101e10;
+  }
+  printf("have %d %s%s.\n",(ulong)*(uint *)(param_4 + (long)param_2 * 4),(&cards)[param_2],puVar1);
+  *(int *)(param_3 + (long)param_2 * 4) =
+       *(int *)(param_4 + (long)param_2 * 4) + *(int *)(param_3 + (long)param_2 * 4);
+  *(undefined4 *)(param_4 + (long)param_2 * 4) = 0;
+  if (*(int *)(param_3 + (long)param_2 * 4) == 4) {
+    printplayer(param_1);
+    printf("made a book of %s\'s!\n",(&cards)[param_2]);
+    chkwinner(param_1,param_3);
+  }
+  chkwinner(1 - param_1,param_4);
+  printplayer(param_1);
+  puts("get another guess!");
+  return;
+}
+
+
+ulong nrandom(int param_1)
+
+{
+  ulong uVar1;
+  
+  uVar1 = random();
+  return (long)((ulong)(uint)((int)uVar1 >> 0x1f) << 0x20 | uVar1 & 0xffffffff) % (long)param_1 &
+         0xffffffff;
+}
+
+
+
+void chkwinner(undefined4 param_1,long param_2)
+
+{
+  uint uVar1;
+  uint uVar2;
+  int iVar3;
+  int local_14;
+  
+  local_14 = 0;
+  while( true ) {
+    if (0xc < local_14) {
+      printplayer(param_1);
+      puts("don\'t have any more cards!");
+      printf("My books:");
+      uVar1 = countbooks(comphand);
+      printf("Your books:");
+      uVar2 = countbooks(userhand);
+      printf("\nI have %d, you have %d.\n",(ulong)uVar1,(ulong)uVar2);
+      if ((int)uVar1 < (int)uVar2) {
+        puts("\nYou win!!!");
+        iVar3 = nrandom(0x400);
+        if (iVar3 == 0x1d3) {
+          puts("Cheater, cheater, pumpkin eater!");
+        }
+      }
+      else if ((int)uVar2 < (int)uVar1) {
+        puts("\nI win!!!");
+        iVar3 = nrandom(0x400);
+        if (iVar3 == 0x1d3) {
+          puts("Hah!  Stupid peasant!");
+        }
+      }
+      else {
+        puts("\nTie!");
+      }
+                    /* WARNING: Subroutine does not return */
+      exit(0);
+    }
+    if ((0 < *(int *)(param_2 + (long)local_14 * 4)) && (*(int *)(param_2 + (long)local_14 * 4) < 4)
+       ) break;
+    local_14 = local_14 + 1;
+  }
+  return;
+}
+
+
+
+
+
+
+
+
+bool gofish(int param_1,int param_2,undefined8 param_3)
+
+{
+  int iVar1;
+  
+  printplayer(1 - param_2);
+  puts("say \"GO FISH!\"");
+  iVar1 = drawcard(param_2,param_3);
+  if (param_1 == iVar1) {
+    printplayer(param_2);
+    puts("drew the guess!");
+    printplayer(param_2);
+    puts("get to ask again!");
+  }
+  return param_1 == iVar1;
+}
+
+
+
+
+
+
+

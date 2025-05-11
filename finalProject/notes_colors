@@ -1,0 +1,83 @@
+
+void welcomeScreen(void)
+
+{
+  int iVar1;
+  int x_cord;
+  uint uVar2;
+  
+  wgetch(stdscr);
+  wgetch(stdscr);
+  wgetch(stdscr);
+  mvwprintw(window,0x14,8,"Press any key...");
+  x_cord = 0;
+  do {
+    iVar1 = wgetch(stdscr);
+    if (iVar1 != -1) {
+      return;
+    }
+    wattr_on(window,0xb00,0);
+    iVar1 = x_cord + 1;
+    mvwprintw(window,8,x_cord,&C_char);
+    wrefresh(window);
+    usleep(100000);
+    x_cord = iVar1;
+  } while (iVar1 != 0xd);
+  x_cord = 0;
+  wattr_on(window,0xb00,0);
+  mvwprintw(window,8,0xc,"PACMAN");
+  wrefresh(window);
+  usleep(1000000);
+  do {
+    iVar1 = wgetch(stdscr);
+    if (iVar1 != -1) {
+      return;
+    }
+    wattr_on(window,0x300,0);
+    mvwprintw(window,0xd,0x17,"*");
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,x_cord,&C_char);
+    wattr_on(window,0x600,0);
+    mvwprintw(window,0xd,x_cord + -3,&&_char);
+    wattr_on(window,0x800,0);
+    mvwprintw(window,0xd,x_cord + -5,&&_char);
+    wattr_on(window,0x700,0);
+    mvwprintw(window,0xd,x_cord + -7,&&_char);
+    wattr_on(window,0x900,0);
+    iVar1 = x_cord + -9;
+    x_cord = x_cord + 1;
+    mvwprintw(window,0xd,iVar1,&&_char);
+    wrefresh(window);
+    usleep(100000);
+  } while (x_cord != 0x17);
+  uVar2 = 0x19;
+  usleep(150000);
+  x_cord = 0x17;
+  do {
+    iVar1 = wgetch(stdscr);
+    if (iVar1 != -1) {
+      return;
+    }
+    wattr_on(window,0x300,0);
+    mvwprintw(window,0xd,0x17,&space_char);
+    x_cord = x_cord - (uVar2 & 1);
+    wattr_on(window,0xa00,0);
+    mvwprintw(window,0xd,x_cord + -9,&&_char);
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,x_cord + -8,&space_char);
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,x_cord + -6,&space_char);
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,x_cord + -4,&space_char);
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,x_cord + -2,&space_char);
+    wattr_on(window,0xb00,0);
+    mvwprintw(window,0xd,uVar2 - 3,&DAT_00104092);
+    wattr_on(window,0x300,0);
+    uVar2 = uVar2 - 1;
+    mvwprintw(window,0xd,0x17,&space_char);
+    wrefresh(window);
+    usleep(100000);
+  } while (uVar2 != 2);
+  return;
+}

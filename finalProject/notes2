@@ -1,0 +1,89 @@
+void paused(void)
+
+{
+  int iVar1;
+  
+  wattr_on(window,0xb00,0);
+  mvwprintw(window,0xc,10,"********");
+  mvwprintw(window,0xd,10,"*PAUSED*");
+  mvwprintw(window,0xe,10,"********");
+  wrefresh(window);
+  do {
+    iVar1 = wgetch(stdscr);
+  } while (iVar1 == -1);
+  return;
+}
+
+void print_usage(undefined8 param_1)
+
+{
+  __printf_chk(1,"Usage: %s [OPTION]\n\n",param_1);
+  puts("Options:");
+  puts("  -h, --help        print help");
+  puts("  --level=[1..9]    start at specified standard level");
+  puts("  --level=LEVEL     play specified non-standard LEVEL");
+  return;
+}
+
+void printErrorMessage(char *param_1)
+
+{
+  endwin();
+  puts(param_1);
+                    /* WARNING: Subroutine does not return */
+  exit(0);
+}
+
+
+void setupDisplay(void)
+
+{
+  initscr();
+  start_color();
+  curs_set(0);
+  keypad(stdscr,1);
+  nodelay(stdscr,1);
+  nonl();
+  cbreak();
+  noecho();
+  init_pair(2,7,0);
+  init_pair(1,7,7);
+  init_pair(3,7,0);
+  init_pair(4,4,0);
+  init_pair(5,7,6);
+  init_pair(6,1,0);
+  init_pair(7,6,0);
+  init_pair(8,5,0);
+  init_pair(9,3,0);
+  init_pair(10,4,1);
+  init_pair(0xb,3,0);
+  return;
+}
+
+
+void checkWindowSize(void)
+
+{
+  int iVar1;
+  int iVar2;
+  
+  iVar1 = getmaxy(stdscr);
+  iVar2 = getmaxx(stdscr);
+  if ((0x1f < iVar1) && (0x1c < iVar2)) {
+    return;
+  }
+  endwin();
+  fwrite("\nSorry.\n",1,8,stderr);
+  fwrite("To play Pacman for Console, your console window must be at least 29x32\n",1,0x47,stderr);
+  fwrite("Please resize your window/resolution and re-run the game.\n\n",1,0x3b,stderr);
+                    /* WARNING: Subroutine does not return */
+  exit(0);
+}
+
+void createNewWindow(void)
+
+{
+  window = newwin();
+  panel = newwin(3,0x1b,0x1d,1);
+  return;
+}

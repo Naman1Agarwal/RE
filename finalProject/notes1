@@ -1,0 +1,210 @@
+undefined8 main(int argc,char **argv)
+
+{
+  char *__s1;
+  bool bVar1;
+  undefined4 uVar2;
+  undefined4 uVar3;
+  int iVar4;
+  size_t sVar5;
+  time_t seed_val;
+  int cur_level;
+  char **arg1;
+  char *levelFile;
+  int local_40;
+  int local_3c;
+  
+  if (argc < 2) {
+    local_3c = 1;
+    levelFile = (char *)0x0;
+  }
+  else {
+    local_3c = 1;
+    arg1 = argv + 1;
+    do {
+      __s1 = *arg1;
+      cur_level = strcmp(__s1,"--help");
+      if (((cur_level == 0) || (((*__s1 == '-' && (__s1[1] == 'h')) && (__s1[2] == '\0')))) ||
+         (cur_level = strncmp(__s1,"--level=",8), cur_level != 0)) {
+        print_usage(*argv);
+        return 0;
+      }
+      levelFile = __s1 + 8;
+      sVar5 = strlen(levelFile);
+      if ((int)sVar5 == 0) {
+        levelFile = (char *)0x0;
+      }
+      else if ((int)sVar5 == 1) {
+        current_level = 0x31;
+        bVar1 = false;
+        iVar4 = L'1';
+        cur_level = local_40;
+        do {
+          local_40 = cur_level;
+          if (__s1[8] == iVar4) {
+            if (bVar1) {
+              current_level = local_40;
+            }
+            local_3c = iVar4 + -0x30;
+            levelFile = (char *)0x0;
+            goto LAB_001012d1;
+          }
+          iVar4 = iVar4 + 1;
+          bVar1 = true;
+          cur_level = iVar4;
+        } while (iVar4 != 0x3a);
+        current_level = 0x3a;
+      }
+LAB_001012d1:
+      arg1 = arg1 + 1;
+    } while (arg1 != argv + (ulong)(argc - 2) + 2);
+  }
+  seed_val = time((time_t *)0x0);
+  srand((uint)seed_val);
+  setupDisplay();
+  checkWindowSize();
+  createNewWindow(0x1d,0x1c,1,1);
+  welcomeScreen();
+  uVar3 = current_score;
+  uVar2 = numLives;
+  do {
+    cur_level = local_3c;
+    numLives = uVar2;
+    current_score = uVar3;
+    if (levelFile == (char *)0x0) {
+      while (current_level = cur_level, cur_level < 10) {
+        sVar5 = strlen(s_/usr/share/pacman4console/Levels);
+        (&DAT_0010615a)[sVar5] = 0x30;
+        sVar5 = strlen(s_/usr/share/pacman4console/Levels);
+        (&DAT_0010615b)[sVar5] = (char)cur_level + '0';
+        openLevelandMakeMap(s_/usr/share/pacman4console/Levels);
+        eatGhost_state = 0;
+        cur_level = playGame();
+        if (cur_level == 1) break;
+        cur_level = current_level + 1;
+      }
+    }
+    else {
+      openLevelandMakeMap(levelFile);
+      eatGhost_state = 0;
+      playGame();
+    }
+    cur_level = finishedGame();
+    if (cur_level == 1) {
+                    /* WARNING: Subroutine does not return */
+      printErrorMessage("Good bye!");
+    }
+  } while( true );
+}
+
+
+void openLevelandMakeMap(char *level)
+
+{
+  FILE *fileDescriptor;
+  size_t sVar1;
+  long i;
+  int col;
+  undefined8 *puVar2;
+  int *map_loc;
+  int row;
+  long in_FS_OFFSET;
+  long offset;
+  char *error_message;
+  char *2ndPartofErrorMessage;
+  char *3rdPartofErrorMessage;
+  undefined8 local_140;
+  undefined8 local_138 [30];
+  undefined2 local_44;
+  undefined local_42;
+  long canary;
+  int object;
+  
+  canary = *(long *)(in_FS_OFFSET + 0x28);
+  local_140 = 0;
+  error_message = (char *)0x6620746f6e6e6143;
+  2ndPartofErrorMessage = (char *)0x6576656c20646e69;
+  3rdPartofErrorMessage = (char *)0x203a656c6966206c;
+  _DAT_00106f00 = 1;
+  uRam0000000000106f08 = 0xffffffff;
+  numPellets = 0;
+  _DAT_00106f10 = 0xffffffff00000000;
+  uRam0000000000106f18 = 0x100000000;
+  puVar2 = local_138;
+  for (i = 0x1f; i != 0; i = i + -1) {
+    *puVar2 = 0;
+    puVar2 = puVar2 + 1;
+  }
+  _move_x = 0xffffffff00000000;
+  fileDescriptor = fopen(level,"r");
+  if (fileDescriptor == (FILE *)0x0) {
+    __strncat_chk(&error_message,level,0xff,0x118);
+    sVar1 = strlen(level);
+    if (0xff < sVar1) {
+      local_42 = 0x2e;
+      local_44 = 0x2e2e;
+    }
+                    /* WARNING: Subroutine does not return */
+    printErrorMessage(&error_message);
+  }
+  offset = 0;
+  col = 0;
+  do {
+    row = 0;
+    map_loc = (int *)(&map + offset * 4);
+    do {
+      while( true ) {
+        __isoc99_fscanf(fileDescriptor,&%d_char,map_loc);
+        object = *map_loc;
+        if (object != 2) break;
+        row = row + 1;
+        numPellets = numPellets + 1;
+        map_loc = map_loc + 1;
+        if (row == 0x1c) goto LAB_0010248e;
+      }
+      if (object == 5) {
+        1stGhost_x = col;
+        1stGhost_y = row;
+        *map_loc = 0;
+      }
+      else if (object == 6) {
+        2ndGhost_x = col;
+        2ndGhost_y = row;
+        *map_loc = 0;
+      }
+      else if (object == 7) {
+        3rdGhost_x = col;
+        3rdGhost_y = row;
+        *map_loc = 0;
+      }
+      else if (object == 8) {
+        4thGhost_x = col;
+        4thGhost_y = row;
+        *map_loc = 0;
+      }
+      else if (object == 9) {
+        pacman_x = col;
+        pacman_y = row;
+        *map_loc = 0;
+      }
+      row = row + 1;
+      map_loc = map_loc + 1;
+    } while (row != 0x1c);
+LAB_0010248e:
+    col = col + 1;
+    offset = offset + 0x1c;
+    if (col == 0x1d) {
+      __isoc99_fscanf(fileDescriptor,&%d_char,&current_level);
+      i = 0;
+      do {
+        *(undefined8 *)((long)&startingGhostPos + i) = *(undefined8 *)((long)&1stGhost_x + i);
+        i = i + 8;
+      } while (i != 0x28);
+      if (canary == *(long *)(in_FS_OFFSET + 0x28)) {
+        return;
+      }
+                    /* WARNING: Subroutine does not return */
+      __stack_chk_fail();
+    }
+  } while( true );
+}

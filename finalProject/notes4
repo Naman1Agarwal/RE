@@ -1,0 +1,231 @@
+
+void printFrame(void)
+
+{
+  int iVar1;
+  ulong col;
+  int[0][0] *map;
+  uint unaff_R15D;
+  int row;
+  
+  map = &::map;
+  row = 0;
+  do {
+    col = 0;
+    do {
+      if (*(uint *)(map + col * 4) < 5) {
+                    /* WARNING: Could not recover jumptable at 0x0010183e. Too many branches */
+                    /* WARNING: Treating indirect jump as call */
+        (*(code *)(&walls + *(int *)(&walls + (ulong)*(uint *)(map + col * 4) * 4)))();
+        return;
+      }
+      iVar1 = wmove(window,row,col & 0xffffffff);
+      if (iVar1 != -1) {
+        waddch(window,unaff_R15D | 0x20);
+      }
+      col = col + 1;
+    } while (col != 0x1c);
+    row = row + 1;
+    map = map + 0x70;
+  } while (row != 0x1d);
+  iVar1 = 0;
+  wmove(panel,1,1);
+  wattr_on(panel,0xb00,0);
+  if (0 < numLives) {
+    do {
+      iVar1 = iVar1 + 1;
+      wprintw(panel,&C_char);
+    } while (iVar1 < numLives);
+  }
+  wprintw(panel,&space);
+  wattr_on(panel,0x200,0);
+  mvwprintw(panel,2,2,"Level: %d     Score: %d ",current_level,current_score);
+  wrefresh(panel);
+  if (eatGhost_state == 0) {
+    wattr_on(window,0x600,0);
+    iVar1 = wmove(window,1stGhost_x,1stGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,0x26);
+    }
+    wattr_on(window,0x700,0);
+    iVar1 = wmove(window,2ndGhost_x,2ndGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,0x26);
+    }
+    wattr_on(window,0x800,0);
+    iVar1 = wmove(window,3rdGhost_x,3rdGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,0x26);
+    }
+    wattr_on(window,0x900,0);
+    iVar1 = wmove(window,4thGhost_x,4thGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,0x26);
+    }
+  }
+  else {
+    wattr_on(window,0xa00,0);
+    iVar1 = wmove(window,1stGhost_x,1stGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,timer + 0x30);
+    }
+    iVar1 = wmove(window,2ndGhost_x,2ndGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,timer + 0x30);
+    }
+    iVar1 = wmove(window,3rdGhost_x,3rdGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,timer + 0x30);
+    }
+    iVar1 = wmove(window,4thGhost_x,4thGhost_y);
+    if (iVar1 != -1) {
+      waddch(window,timer + 0x30);
+    }
+  }
+  wattr_on(window,0xb00,0);
+  iVar1 = wmove(window,pacman_x,pacman_y);
+  if (iVar1 != -1) {
+    waddch(window,0x43);
+  }
+  wrefresh(window);
+  return;
+}
+
+
+
+
+void movePacman(void)
+
+{
+  time_t cur_time;
+  int object;
+  bool normalMode;
+  int x_pos;
+  int y_pos;
+  
+  y_pos = pacman_y;
+  if (pacman_x == 0) {
+    if (move_x == -1) {
+      pacman_x = 0x1c;
+      object = *(int *)(&DAT_00106e40 + (long)pacman_y * 4);
+      x_pos = pacman_x;
+    }
+    else {
+LAB_00102c06:
+      x_pos = pacman_x;
+      if (pacman_y == 0) {
+        if (move_y == -1) {
+          pacman_y = 0x1b;
+          object = (&DAT_0010626c)[(long)pacman_x * 0x1c];
+          y_pos = pacman_y;
+        }
+        else {
+LAB_00102c1d:
+          object = *(int *)(&map + ((long)(move_y + pacman_y) + (long)(move_x + pacman_x) * 0x1c) *
+                                   4);
+          if ((object == 1) || (x_pos = move_x + pacman_x, y_pos = move_y + pacman_y, object == 4))
+          {
+            object = *(int *)(&map + ((long)pacman_y + (long)pacman_x * 0x1c) * 4);
+            x_pos = pacman_x;
+            y_pos = pacman_y;
+          }
+        }
+      }
+      else {
+        if ((pacman_y != 0x1b) || (move_y != 1)) goto LAB_00102c1d;
+        pacman_y = 0;
+        object = *(int *)(&map + (long)pacman_x * 0x70);
+        y_pos = pacman_y;
+      }
+    }
+  }
+  else {
+    if ((pacman_x != 0x1c) || (move_x != 1)) goto LAB_00102c06;
+    pacman_x = 0;
+    object = *(int *)(&map + (long)pacman_y * 4);
+    x_pos = pacman_x;
+  }
+  pacman_y = y_pos;
+  pacman_x = x_pos;
+  if (object == 2) {
+    current_score = current_score + 1;
+    numPellets = numPellets + -1;
+    normalMode = eatGhost_state != 1;
+    *(undefined4 *)(&map + ((long)pacman_y + (long)pacman_x * 0x1c) * 4) = 0;
+    if (normalMode) goto LAB_00102cc7;
+  }
+  else {
+    if (object == 3) {
+      eatGhost_state = 1;
+      *(undefined4 *)(&map + ((long)pacman_y + (long)pacman_x * 0x1c) * 4) = 0;
+      if (ghostKillPoints == 0) {
+        ghostKillPoints = 1;
+      }
+      cur_time = time((time_t *)0x0);
+      timeStarted = (int)cur_time;
+    }
+    if (eatGhost_state != 1) goto LAB_00102cc7;
+  }
+  y_pos = timeStarted;
+  cur_time = time((time_t *)0x0);
+  timer = ((y_pos + 0xb) - current_level) - (int)cur_time;
+LAB_00102cc7:
+  if (timer < 0) {
+    eatGhost_state = 0;
+    ghostKillPoints = 0;
+    timer = 0;
+    return;
+  }
+  return;
+}
+
+
+
+
+undefined8 checkIfHit(void)
+
+{
+  long i;
+  int *ghostPos;
+  undefined8 *startingGhostPos;
+  
+  startingGhostPos = &::startingGhostPos;
+  ghostPos = &1stGhost_x;
+  do {
+    if ((*ghostPos == pacman_x) && (ghostPos[1] == pacman_y)) {
+      if (eatGhost_state != 1) {
+        wattr_on(window,0xb00,0);
+        mvwprintw(window,pacman_x,pacman_y,&X_char);
+        wrefresh(window);
+        numLives = numLives + -1;
+        usleep(1000000);
+        if (numLives != -1) {
+          i = 0;
+          do {
+            *(undefined8 *)((long)&1stGhost_x + i) = *(undefined8 *)((long)&::startingGhostPos + i);
+            i = i + 8;
+          } while (i != 0x28);
+          _1stGhost_dx = 1;
+          uRam0000000000106f08 = 0xffffffff;
+          _move_x = 0xffffffff00000000;
+          _DAT_00106f10 = 0xffffffff00000000;
+          uRam0000000000106f18 = 0x100000000;
+          printFrame();
+          usleep(1000000);
+          return 0;
+        }
+        return 1;
+      }
+      current_score = current_score + ghostKillPoints * 0x14;
+      mvwprintw(window,pacman_x,pacman_y + -1,&%d_char);
+      ghostKillPoints = ghostKillPoints << 1;
+      wrefresh(window);
+      usleep(1000000);
+      *(undefined8 *)ghostPos = *startingGhostPos;
+    }
+    startingGhostPos = startingGhostPos + 1;
+    ghostPos = ghostPos + 2;
+  } while (ghostPos != &pacman_x);
+  return 0;
+}
+
